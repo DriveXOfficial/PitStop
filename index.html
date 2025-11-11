@@ -1,256 +1,1252 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DriveX — Pit Strategy Simulator</title>
-<style>
-:root{
-  --bg-main:#0A0F2C;
-  --bg-card:#0A0A0A;
-  --accent:#C5A253;
-  --accent-light:#FFFFFF;
-  --muted:#94a3b8;
-  --flag-blue:#0055A4;
-  --flag-white:#FFFFFF;
-  --flag-red:#EF4135;
-}
-*{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
-body{margin:0;background:var(--bg-main);color:var(--accent-light);}
-h1,h2,h3{margin:0;}
-h1{font-size:1.8em;color:var(--accent);}
-h2{font-size:1.2em;color:var(--accent);margin-bottom:8px;}
-h3{font-size:1em;color:var(--accent-light);margin-top:12px;}
-label{display:block;margin-top:10px;color:var(--muted);}
-input,select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:inherit;}
-button{cursor:pointer;border:none;border-radius:8px;padding:8px 12px;font-weight:700;}
-.btn{background:var(--accent);color:#0A0A0A;}
-.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--accent);}
-.app{max-width:1150px;margin:28px auto;padding:20px;display:grid;grid-template-columns:360px 1fr 320px;gap:18px;}
-.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.05);padding:16px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,0.6);}
-.row{display:flex;gap:8px;align-items:center;}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px;}
-th,td{padding:8px;text-align:left;border-bottom:1px dashed rgba(255,255,255,0.03);}
-.small{font-size:12px;color:var(--muted);}
-.big-number{font-size:28px;font-weight:700;}
-.history-box{max-height:320px;overflow:auto;}
-.kpi{display:flex;gap:12px;flex-wrap:wrap;}
-.kpi .card{padding:12px;}
-footer{max-width:1150px;margin:8px auto 40px;color:var(--muted);font-size:13px;text-align:center;}
-/* --- Popup paramètres --- */
-.popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center;z-index:1000;}
-.popup-content{background:var(--bg-main);border-radius:16px;border:1px solid rgba(197,162,83,0.4);padding:25px;width:90%;max-width:600px;box-shadow:0 0 25px rgba(197,162,83,0.3);animation:fadeIn 0.3s ease;}
-.close-btn{background:red;float:right;font-weight:bold;border-radius:8px;padding:4px 8px;color:white;}
-@keyframes fadeIn{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveX Academy - Pit Strategy</title>
+    <style>
+        :root {
+            --bg-main: #0A0F2C;
+            --bg-card: #0A0A0A;
+            --accent: #C5A253;
+            --accent-light: #FFFFFF;
+            --muted: #94a3b8;
+            --flag-blue: #0055A4;
+            --flag-white: #FFFFFF;
+            --flag-red: #EF4135;
+        }
 
-/* --- Widget Apple-style interactif --- */
-#pit_widget{
-  position:fixed;bottom:20px;right:20px;width:220px;padding:12px;background:rgba(10,15,44,0.9);border-radius:16px;border:1px solid rgba(197,162,83,0.4);box-shadow:0 4px 20px rgba(197,162,83,0.4);color:var(--accent-light);font-weight:600;z-index:999;transition:all 0.6s ease;
-}
-#pit_widget:hover{width:300px;padding:18px;box-shadow:0 6px 30px rgba(197,162,83,0.6);}
-#pit_widget .bar-bg{width:100%;height:10px;background:rgba(255,255,255,0.05);border-radius:8px;margin-top:8px;}
-#pit_widget .bar-fill{height:10px;width:0%;background:var(--accent);border-radius:8px;transition:width 0.3s;}
-#pit_widget .extra-info{display:none;margin-top:10px;font-size:12px;color:var(--accent-light);}
-#pit_widget:hover .extra-info{display:block;}
-</style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(180deg, #071226 0%, #071827 100%);
+            color: var(--accent-light);
+            font-size: 14px;
+            font-weight: 500;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .logo {
+            position: relative;
+            top: 12px;
+            left: 20px;
+            width: 120px;
+            z-index: 10;
+        }
+
+        .rond-bleu {
+            position: absolute;
+            top: 31px;
+            left: 31px;
+            width: 95px;
+            height: 95px;
+            border-radius: 50%;
+            background: var(--bg-main);
+            border: 2px solid var(--accent-light);
+            z-index: 9;
+        }
+
+        .liseret {
+            position: fixed;
+            top: 0;
+            left: 67.5px;
+            width: 24px;
+            height: 100vh;
+            display: flex;
+            flex-direction: row;
+            pointer-events: none;
+            z-index: 8;
+        }
+
+        .liseret-blue { flex: 1; background: var(--flag-blue); }
+        .liseret-white { flex: 1; background: var(--flag-white); }
+        .liseret-red { flex: 1; background: var(--flag-red); }
+
+        header {
+            max-width: 1150px;
+            margin: 18px auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            padding-top: 10px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+
+        header p {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .btn-config {
+            margin: 15px auto;
+            text-align: center;
+        }
+
+        .app {
+            max-width: 1150px;
+            margin: 28px auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 360px 1fr 320px;
+            gap: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            padding: 16px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.04);
+            box-shadow: 0 6px 24px rgba(2,6,23,0.6);
+        }
+
+        .card h2 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 4px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--accent-light);
+            font-size: 14px;
+        }
+
+        select {
+            background: var(--bg-main);
+        }
+
+        select option {
+            background: var(--bg-main);
+            color: var(--accent-light);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #d4b267;
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: none;
+            color: var(--accent);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-group .btn, .btn-group .btn-ghost {
+            flex: 1;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+            align-items: center;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .advice-box {
+            margin: 15px 0;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            border-left: 4px solid var(--accent);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .advice-box.green { border-left-color: #22c55e; }
+        .advice-box.orange { border-left-color: #f59e0b; }
+        .advice-box.red { border-left-color: #ef4444; }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .history-table thead {
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+            z-index: 1;
+        }
+
+        .history-table th {
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+            color: var(--accent);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .history-table tbody {
+            display: block;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .history-table thead, .history-table tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .history-table td {
+            padding: 8px;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 10px 0;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .widget-pitstop {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 220px;
+            padding: 16px;
+            background: rgba(10,15,44,0.9);
+            border: 1px solid rgba(197,162,83,0.4);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(197,162,83,0.4);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            max-height: 80px;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .widget-pitstop:hover {
+            max-height: 300px;
+        }
+
+        .widget-pitstop h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .widget-pitstop .stat {
+            font-size: 12px;
+            margin: 6px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .widget-pitstop .stat-label {
+            color: var(--muted);
+        }
+
+        .widget-pitstop .stat-value {
+            color: var(--accent-light);
+            font-weight: 600;
+        }
+
+        .widget-details {
+            opacity: 0;
+            transition: opacity 0.4s ease 0.2s;
+        }
+
+        .widget-pitstop:hover .widget-details {
+            opacity: 1;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-content {
+            background: var(--bg-main);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 25px rgba(197,162,83,0.3);
+            animation: scaleIn 0.3s;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            color: var(--accent);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--accent-light);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: var(--accent);
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .alert-text {
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .alert-highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+            color: var(--muted);
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 1200px) {
+            .app {
+                grid-template-columns: 1fr;
+                max-width: 600px;
+            }
+            .widget-pitstop {
+                position: static;
+                width: 100%;
+                margin: 20px auto;
+            }
+        }
+    </style>
 </head>
 <body>
-<header style="text-align:center;padding:20px;">
-  <h1>DriveX Academy- Simulateur de stratégie de pit</h1>
-  <p class="small">Fichier autonome HTML/JS/CSS — Déposez sur GitHub Pages</p>
-</header>
+    <div class="rond-bleu"></div>
+    <img src="https://i.ibb.co/nNkcmrsf/Drive-X-Academy-transparent-blanc.png" alt="DriveX Academy" class="logo">
 
-<button id="openSetup" class="btn" style="margin:0 auto;display:block;">⚙️ Paramètres avant-course</button>
-
-<div class="app">
-  <!-- Colonne gauche: Paramètres rapides -->
-  <div class="card">
-    <h2>Paramètres rapides</h2>
-    <label>Durée moyenne d'un tour (s)</label><input id="input_tour_moyen" value="90">
-    <label>Consommation carburant par tour (L)</label><input id="input_conso_tour" value="2.8">
-    <label>Marge carburant (tours)</label><input id="input_marge_tours" value="1">
-    <label>Temps base arrêt aux stands (s)</label><input id="input_pit_base" value="20">
-    <label>Changement pneus (s)</label><input id="input_changement_pneu" value="25">
-    <div style="margin-top:12px;" class="row">
-      <button class="btn" id="save_params">Sauvegarder</button>
-      <button class="btn-ghost" id="reset_all">Réinitialiser</button>
+    <div class="liseret">
+        <div class="liseret-blue"></div>
+        <div class="liseret-white"></div>
+        <div class="liseret-red"></div>
     </div>
-  </div>
 
-  <!-- Middle: Course -->
-  <div class="card">
-    <h2>Course — Saisie tour par tour</h2>
-    <div class="row">
-      <label style="flex:1">Tour # <input id="tour_actuel" type="number" min="1" value="1" style="width:80px;margin-left:8px"></label>
-      <label style="flex:1">Chrono du tour (s) <input id="chrono_tour" value="" style="width:120px;margin-left:8px"></label>
+    <header>
+        <h1>🏎️ DriveX Academy - Pit Strategy Simulator</h1>
+        <p>Optimisez vos arrêts aux stands en temps réel</p>
+        <div class="btn-config">
+            <button class="btn" onclick="openModal()">⚙️ Paramètres avant-course</button>
+        </div>
+    </header>
+
+    <div class="app">
+        <div class="card">
+            <h2>⚡ Paramètres rapides</h2>
+            
+            <label for="course_minutes">Durée course (min)</label>
+            <input type="number" id="course_minutes" value="90" step="1">
+            
+            <label for="course_tours">Nombre de tours</label>
+            <input type="number" id="course_tours" value="50" step="1">
+            
+            <label for="tour_moyen">Temps tour moyen (s)</label>
+            <input type="number" id="tour_moyen" value="95" step="0.1">
+            
+            <label for="conso_tour">Consommation (L/tour)</label>
+            <input type="number" id="conso_tour" value="2.5" step="0.1">
+            
+            <label for="reservoir_max">Capacité réservoir (L)</label>
+            <input type="number" id="reservoir_max" value="110" step="1">
+            
+            <label>Marge carburant (tours)</label>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="marge_1" onclick="toggleMargeCheckbox(1)">
+                    <label for="marge_1">+ 1 tour</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="marge_2" onclick="toggleMargeCheckbox(2)">
+                    <label for="marge_2">+ 2 tours</label>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn" onclick="saveParams()">💾 Sauvegarder</button>
+                <button class="btn-ghost" onclick="resetAll()">🔄 Réinitialiser</button>
+            </div>
+
+            <h2 style="margin-top: 20px;">🔧 Réparations</h2>
+            
+            <label for="repair_avant">Aileron avant (s)</label>
+            <input type="number" id="repair_avant" value="10" step="1">
+            
+            <label for="repair_arriere">Aileron arrière (s)</label>
+            <input type="number" id="repair_arriere" value="12" step="1">
+            
+            <label for="repair_suspension">Suspension (s)</label>
+            <input type="number" id="repair_suspension" value="18" step="1">
+            
+            <div style="margin-top: 20px;">
+                <button class="btn btn-danger" onclick="clearAllTours()" style="width: 100%;">🗑️ Effacer tous les tours</button>
+            </div>
+        </div>
+
+        <div>
+            <div class="card">
+                <h2>🏁 Saisie tour par tour</h2>
+                
+                <label for="tour_numero">Tour actuel</label>
+                <input type="number" id="tour_numero" value="1" step="1">
+                
+                <label for="tour_chrono">Chrono du tour (m.ss.ms)</label>
+                <input type="text" id="tour_chrono" placeholder="Ex: 1.26.359 ou 86.359">
+                
+                <label for="tour_degat">Type de dégât</label>
+                <select id="tour_degat">
+                    <option value="none">Aucun</option>
+                    <option value="avant">Aileron avant</option>
+                    <option value="arriere">Aileron arrière</option>
+                    <option value="suspension">Suspension</option>
+                </select>
+                
+                <label for="tour_fuel">Fuel restant (L)</label>
+                <input type="number" id="tour_fuel" step="0.1" placeholder="Ex: 45.5">
+
+                <div class="btn-group">
+                    <button class="btn" onclick="addTour()">✅ Enregistrer ce tour</button>
+                    <button class="btn-ghost" onclick="undoLastTour()">↩️ Annuler dernier</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 18px;">
+                <h2>💡 Conseil instantané</h2>
+                <div class="advice-box" id="advice_box">
+                    Enregistrez votre premier tour pour obtenir des conseils stratégiques.
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 18px;">
+                <h2>📊 Historique des tours</h2>
+                <div style="max-height: 320px; overflow-y: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">Tour</th>
+                                <th style="width: 20%;">Chrono</th>
+                                <th style="width: 20%;">Dégât</th>
+                                <th style="width: 15%;">Fuel</th>
+                                <th style="width: 30%;">Conseil</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history_body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--muted);">Aucun tour enregistré</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card">
+                <h2>📈 KPI Course</h2>
+                <div style="margin: 20px 0;">
+                    <div class="kpi-label">Autonomie restante</div>
+                    <div class="kpi-value" id="kpi_autonomie">--</div>
+                    <div class="kpi-label">tours</div>
+                </div>
+                <div style="margin: 20px 0;">
+                    <div class="kpi-label">Tours restants</div>
+                    <div class="kpi-value" id="kpi_tours_restants">--</div>
+                    <div class="kpi-label">tours</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 18px;">
+                <h2>⏱️ Arrêt planifié</h2>
+                <div style="margin: 10px 0;">
+                    <div class="kpi-label">Temps pit estimé</div>
+                    <div class="kpi-value" id="pit_time">-- s</div>
+                </div>
+                <div style="margin: 10px 0;">
+                    <div class="kpi-label">Fuel à ajouter</div>
+                    <div class="kpi-value" id="fuel_add">-- L</div>
+                </div>
+            </div>
+        </div>
     </div>
-    <label style="margin-top:8px">Dégâts</label>
-    <select id="degat_select">
-      <option value="none">Aucun</option>
-      <option value="avant">Aileron avant</option>
-      <option value="arriere">Aileron arrière</option>
-      <option value="suspension">Suspension</option>
-    </select>
-    <label style="margin-top:8px">Carburant restant (L)</label><input id="fuel_restant">
-    <div style="margin-top:10px;" class="row">
-      <button class="btn" id="ajouter_tour">Enregistrer ce tour</button>
-      <button class="btn-ghost" id="undo_tour">Annuler dernier</button>
+
+    <div class="widget-pitstop">
+        <h3>🏁 PitStop</h3>
+        <div class="stat">
+            <span class="stat-label">Tours restants</span>
+            <span class="stat-value" id="widget_tours">--</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="widget_progress" style="width: 0%"></div>
+        </div>
+        <div class="widget-details">
+            <div class="stat">
+                <span class="stat-label">Fuel à remettre</span>
+                <span class="stat-value" id="widget_fuel">-- L</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Dégâts cumulés</span>
+                <span class="stat-value" id="widget_degats">Aucun</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Temps pit</span>
+                <span class="stat-value" id="widget_pit_time">-- s</span>
+            </div>
+        </div>
     </div>
-    <h3>Conseil instantané</h3>
-    <div id="advice_box" style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)">Aucune donnée — commencez à enregistrer des tours</div>
-    <h3>Historique des tours</h3>
-    <div class="history-box">
-      <table id="table_history">
-        <thead><tr><th>Tour</th><th>Chrono</th><th>Dégât</th><th>Fuel (L)</th><th>Conseil</th></tr></thead>
-        <tbody></tbody>
-      </table>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Paramètres détaillés</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            
+            <div class="modal-grid">
+                <div>
+                    <label for="m_temps_refuel">Temps refuel (s/L)</label>
+                    <input type="number" id="m_temps_refuel" value="0.18" step="0.01">
+                </div>
+                <div>
+                    <label for="m_pit_base">Temps pit base (s)</label>
+                    <input type="number" id="m_pit_base" value="20" step="1">
+                </div>
+                <div>
+                    <label for="m_pit_entryexit">Entrée + sortie (s)</label>
+                    <input type="number" id="m_pit_entryexit" value="22" step="1">
+                </div>
+                <div>
+                    <label for="m_changement_pneu">Changement pneus (s)</label>
+                    <input type="number" id="m_changement_pneu" value="25" step="1">
+                </div>
+                <div>
+                    <label for="m_pen_avant">Perte aileron avant (s/tour)</label>
+                    <input type="number" id="m_pen_avant" value="1.2" step="0.1">
+                </div>
+                <div>
+                    <label for="m_pen_arriere">Perte aileron arrière (s/tour)</label>
+                    <input type="number" id="m_pen_arriere" value="1.0" step="0.1">
+                </div>
+                <div>
+                    <label for="m_pen_suspension">Perte suspension (s/tour)</label>
+                    <input type="number" id="m_pen_suspension" value="2.5" step="0.1">
+                </div>
+                <div>
+                    <label for="m_min_refuel">Refuel min (L)</label>
+                    <input type="number" id="m_min_refuel" value="3" step="0.1">
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 20px;">
+                <button class="btn" onclick="saveModalParams()">💾 Enregistrer</button>
+                <button class="btn-ghost" onclick="closeModal()">Annuler</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Right: KPI -->
-  <div class="card">
-    <h2>KPIs & Arrêts</h2>
-    <div class="kpi">
-      <div class="card" style="flex:1">
-        <div class="small">Tours restants estimés</div>
-        <div id="kpi_tours_restants" class="big-number">—</div>
-      </div>
-      <div class="card" style="flex:1">
-        <div class="small">Autonomie (tours)</div>
-        <div id="kpi_autonomie" class="big-number">—</div>
-      </div>
+    <div class="modal-overlay" id="slowLapModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚠️ Tour lent détecté</h2>
+            </div>
+            
+            <div class="alert-text">
+                <p>Votre dernier tour est <span class="alert-highlight" id="slowLapDiff">--</span> plus lent que la moyenne.</p>
+                <p style="margin-top: 10px;">Cette performance va-t-elle persister jusqu'à la réparation ?</p>
+            </div>
+
+            <div class="btn-group" style="margin-top: 20px;">
+                <button class="btn" onclick="confirmSlowLap(true)">✅ Oui, dégât permanent</button>
+                <button class="btn-ghost" onclick="confirmSlowLap(false)">❌ Non, incident ponctuel</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- Popup paramètres détaillés -->
-<div id="popupSetup" class="popup">
-  <div class="popup-content">
-    <span id="closeSetup" class="close-btn">✕</span>
-    <h2>Paramètres avant-course détaillés</h2>
-    <label>Durée de la course (min)</label><input id="popup_course_minutes">
-    <label>Nombre de tours</label><input id="popup_course_tours">
-    <label>Capacité réservoir (L)</label><input id="popup_reservoir_max">
-    <label>Temps réparation aileron avant (s)</label><input id="popup_rep_avant">
-    <label>Temps réparation aileron arrière (s)</label><input id="popup_rep_arriere">
-    <label>Temps réparation suspension (s)</label><input id="popup_rep_susp">
-    <label>Perte par tour aileron avant cassé (s)</label><input id="popup_pen_avant">
-    <label>Perte par tour aileron arrière cassé (s)</label><input id="popup_pen_arriere">
-    <label>Perte par tour suspension abîmée (s)</label><input id="popup_pen_susp">
-    <label>Usure pneus (perte s/tour)</label><input id="popup_pen_pneu">
-    <div class="row" style="margin-top:12px;">
-      <button class="btn" id="popup_save">Enregistrer</button>
-    </div>
-  </div>
-</div>
+    <footer>
+        DriveX Official — Version autonome HTML/JS/CSS
+    </footer>
 
-<!-- Widget -->
-<div id="pit_widget">
-  <div><strong>PitStop</strong></div>
-  <div>Tours restants: <span id="pit_remaining">—</span></div>
-  <div class="bar-bg"><div id="pit_bar" class="bar-fill"></div></div>
-  <div class="extra-info">
-    Carburant à remettre: <span id="pit_fuel">—</span> L<br>
-    Dégâts cumulés: <span id="pit_damage">—</span><br>
-    Temps estimé pitstop: <span id="pit_time">—</span> s
-  </div>
-</div>
+    <script>
+        let tours = [];
+        let params = {};
+        let currentSlowLapPenalty = 0;
 
-<footer>DriveX Official — Version autonome HTML/JS/CSS</footer>
+        function init() {
+            loadParams();
+            loadTours();
+            computeAll();
+        }
 
-<script>
-// --- Utils ---
-const $ = id=>document.getElementById(id);
-const toNum=v=>v===''?NaN:parseFloat(v);
+        function toggleMargeCheckbox(value) {
+            const marge1 = document.getElementById('marge_1');
+            const marge2 = document.getElementById('marge_2');
+            
+            if (value === 1) {
+                if (marge1.checked) {
+                    marge2.checked = false;
+                }
+            } else if (value === 2) {
+                if (marge2.checked) {
+                    marge1.checked = false;
+                }
+            }
+            computeAll();
+        }
 
-// --- État ---
-let params = {};
-let tours = [];
+        function getMargeTours() {
+            if (document.getElementById('marge_2').checked) return 2;
+            if (document.getElementById('marge_1').checked) return 1;
+            return 0;
+        }
 
-// --- Chargement / sauvegarde ---
-function loadParams(){
-  const p = JSON.parse(localStorage.getItem('dx_params')||'{}');
-  params = p;
-  ['course_minutes','course_tours','tour_moyen','conso_tour','reservoir_max','pit_base','changement_pneu','marge_tours'].forEach(k=>{
-    if($(k)) $(k).value = p[k]||'';
-    if($('popup_'+k)) $('popup_'+k).value = p[k]||'';
-  });
-}
-function saveParams(){
-  ['course_minutes','course_tours','tour_moyen','conso_tour','reservoir_max','pit_base','changement_pneu','marge_tours'].forEach(k=>{
-    const val = $(k).value; if(val) params[k]=toNum(val);
-  });
-  localStorage.setItem('dx_params',JSON.stringify(params));
-  computeKPIs(); updatePitWidget();
-}
-loadParams();
+        function getDefaultParams() {
+            return {
+                course_minutes: 90,
+                course_tours: 50,
+                tour_moyen: 95,
+                conso_tour: 2.5,
+                reservoir_max: 110,
+                temps_refuel: 0.18,
+                pit_base: 20,
+                pit_entryexit: 22,
+                changement_pneu: 25,
+                marge_tours: 0,
+                repair_aileron_avant: 10,
+                repair_aileron_arriere: 12,
+                repair_suspension: 18,
+                pen_avant: 1.2,
+                pen_arriere: 1.0,
+                pen_suspension: 2.5,
+                min_refuel_l: 3
+            };
+        }
 
-// --- Tours ---
-function loadTours(){ tours = JSON.parse(localStorage.getItem('dx_tours')||'[]'); renderHistory(); computeKPIs(); updatePitWidget();}
-function saveTours(){ localStorage.setItem('dx_tours',JSON.stringify(tours));}
+        function readParams() {
+            const margeTours = getMargeTours();
+            return {
+                course_minutes: parseFloat(document.getElementById('course_minutes').value) || null,
+                course_tours: parseFloat(document.getElementById('course_tours').value) || null,
+                tour_moyen: parseFloat(document.getElementById('tour_moyen').value) || 95,
+                conso_tour: parseFloat(document.getElementById('conso_tour').value) || 2.5,
+                reservoir_max: parseFloat(document.getElementById('reservoir_max').value) || 110,
+                temps_refuel: parseFloat(document.getElementById('m_temps_refuel').value) || 0.18,
+                pit_base: parseFloat(document.getElementById('m_pit_base').value) || 20,
+                pit_entryexit: parseFloat(document.getElementById('m_pit_entryexit').value) || 22,
+                changement_pneu: parseFloat(document.getElementById('m_changement_pneu').value) || 25,
+                marge_tours: margeTours,
+                repair_aileron_avant: parseFloat(document.getElementById('repair_avant').value) || 10,
+                repair_aileron_arriere: parseFloat(document.getElementById('repair_arriere').value) || 12,
+                repair_suspension: parseFloat(document.getElementById('repair_suspension').value) || 18,
+                pen_avant: parseFloat(document.getElementById('m_pen_avant').value) || 1.2,
+                pen_arriere: parseFloat(document.getElementById('m_pen_arriere').value) || 1.0,
+                pen_suspension: parseFloat(document.getElementById('m_pen_suspension').value) || 2.5,
+                min_refuel_l: parseFloat(document.getElementById('m_min_refuel').value) || 3
+            };
+        }
 
-// --- Historique ---
-function renderHistory(){
-  const tbody = document.querySelector('#table_history tbody');
-  tbody.innerHTML='';
-  tours.forEach(t=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${t.tour}</td><td>${isNaN(t.chrono)?'—':t.chrono}</td><td>${t.degat}</td><td>${isNaN(t.fuel)?'—':t.fuel}</td><td>${t.conseil||''}</td>`;
-    tbody.appendChild(tr);
-  });
-}
+        function saveParams() {
+            params = readParams();
+            localStorage.setItem('dx_params', JSON.stringify(params));
+            computeAll();
+            alert('✅ Paramètres sauvegardés');
+        }
 
-// --- Ajout tour ---
-function addTour(){
-  const t={tour:toNum($('tour_actuel').value), chrono:toNum($('chrono_tour').value), degat:$('degat_select').value, fuel:toNum($('fuel_restant').value)};
-  t.conseil='Continuer';
-  tours.push(t); saveTours(); renderHistory(); computeKPIs(); updatePitWidget();
-  $('tour_actuel').value = t.tour+1; $('chrono_tour').value='';
-}
-$('ajouter_tour').addEventListener('click',addTour);
-$('undo_tour').addEventListener('click',()=>{if(tours.length){tours.pop();saveTours();renderHistory();computeKPIs();updatePitWidget();}});
+        function loadParams() {
+            const stored = localStorage.getItem('dx_params');
+            params = stored ? JSON.parse(stored) : getDefaultParams();
+            
+            document.getElementById('course_minutes').value = params.course_minutes || 90;
+            document.getElementById('course_tours').value = params.course_tours || 50;
+            document.getElementById('tour_moyen').value = params.tour_moyen || 95;
+            document.getElementById('conso_tour').value = params.conso_tour || 2.5;
+            document.getElementById('reservoir_max').value = params.reservoir_max || 110;
+            
+            const margeTours = params.marge_tours || 0;
+            document.getElementById('marge_1').checked = (margeTours === 1);
+            document.getElementById('marge_2').checked = (margeTours === 2);
+            
+            document.getElementById('repair_avant').value = params.repair_aileron_avant || 10;
+            document.getElementById('repair_arriere').value = params.repair_aileron_arriere || 12;
+            document.getElementById('repair_suspension').value = params.repair_suspension || 18;
+            document.getElementById('m_temps_refuel').value = params.temps_refuel || 0.18;
+            document.getElementById('m_pit_base').value = params.pit_base || 20;
+            document.getElementById('m_pit_entryexit').value = params.pit_entryexit || 22;
+            document.getElementById('m_changement_pneu').value = params.changement_pneu || 25;
+            document.getElementById('m_pen_avant').value = params.pen_avant || 1.2;
+            document.getElementById('m_pen_arriere').value = params.pen_arriere || 1.0;
+            document.getElementById('m_pen_suspension').value = params.pen_suspension || 2.5;
+            document.getElementById('m_min_refuel').value = params.min_refuel_l || 3;
+        }
 
-// --- KPIs ---
-function computeKPIs(){
-  const last = tours[tours.length-1];
-  let fuel = last?last.fuel:params.reservoir_max;
-  $('kpi_autonomie').textContent = isNaN(fuel)?'—':(fuel/params.conso_tour).toFixed(1);
-  let tours_rest = params.course_tours ? Math.max(0,(params.course_tours - (last?last.tour:0))) : Math.max(0, Math.ceil((params.course_minutes*60 - ((last?last.tour:0)*params.tour_moyen))/params.tour_moyen));
-  $('kpi_tours_restants').textContent = tours_rest;
-}
+        function loadTours() {
+            const stored = localStorage.getItem('dx_tours');
+            tours = stored ? JSON.parse(stored) : [];
+        }
 
-// --- Widget ---
-function updatePitWidget(){
-  const last = tours[tours.length-1];
-  let fuel = last?last.fuel:params.reservoir_max;
-  let tours_rest = params.course_tours ? Math.max(0,(params.course_tours - (last?last.tour:0))) : Math.max(0, Math.ceil((params.course_minutes*60 - ((last?last.tour:0)*params.tour_moyen))/params.tour_moyen));
-  const fuel_needed = tours_rest*params.conso_tour + params.marge_tours*params.conso_tour;
-  const fuel_to_add = Math.max(0, Math.min(params.reservoir_max-fuel, fuel_needed-fuel));
-  $('pit_remaining').textContent = tours_rest;
-  $('pit_bar').style.width = (100 - Math.min(100, (params.marge_tours/Math.max(1,tours_rest))*100))+'%';
-  const damages = tours.filter(t=>t.degat!=='none').map(t=>t.degat).join(', ')||'Aucun';
-  $('pit_damage').textContent = damages;
-  const pit_time = params.pit_base + params.changement_pneu + fuel_to_add*0.18;
-  $('pit_time').textContent = pit_time.toFixed(1);
-}
+        function saveTours() {
+            localStorage.setItem('dx_tours', JSON.stringify(tours));
+        }
 
-// --- Popup ---
-$('openSetup').addEventListener('click',()=>{$('popupSetup').style.display='flex';});
-$('closeSetup').addEventListener('click',()=>{$('popupSetup').style.display='none';});
-$('popup_save').addEventListener('click',()=>{
-  ['course_minutes','course_tours','tour_moyen','conso_tour','reservoir_max','pit_base','changement_pneu','marge_tours'].forEach(k=>{
-    const val=$('popup_'+k).value; if(val) params[k]=toNum(val);
-  });
-  localStorage.setItem('dx_params',JSON.stringify(params));
-  $('popupSetup').style.display='none';
-  computeKPIs(); updatePitWidget();
-  alert('Paramètres avant-course sauvegardés');
-});
+        function parseChronoToSeconds(chronoStr) {
+            if (!chronoStr) return null;
+            
+            const parts = chronoStr.trim().split('.');
+            
+            if (parts.length === 3) {
+                const minutes = parseInt(parts[0]) || 0;
+                const seconds = parseInt(parts[1]) || 0;
+                const milliseconds = parseInt(parts[2]) || 0;
+                return minutes * 60 + seconds + milliseconds / 1000;
+            } else if (parts.length === 2) {
+                const seconds = parseInt(parts[0]) || 0;
+                const milliseconds = parseInt(parts[1]) || 0;
+                return seconds + milliseconds / 1000;
+            } else {
+                return parseFloat(chronoStr) || null;
+            }
+        }
 
-// --- Sauvegarde rapide ---
-$('save_params').addEventListener('click',saveParams);
-$('reset_all').addEventListener('click',()=>{if(confirm('Réinitialiser tout ?')){localStorage.clear();location.reload();}});
-loadTours(); updatePitWidget();
-</script>
+        function formatSecondsToDisplay(seconds) {
+            if (seconds === null || seconds === undefined) return '--';
+            
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            const ms = Math.round((seconds % 1) * 1000);
+            
+            if (minutes > 0) {
+                return `${minutes}.${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+            } else {
+                return `${secs}.${ms.toString().padStart(3, '0')}`;
+            }
+        }
+
+        function checkSlowLap(chrono) {
+            if (!chrono || tours.length < 2) return false;
+            
+            const validChronos = tours
+                .filter(t => t.chrono && t.degat === 'none' && !t.slowLapPermanent)
+                .map(t => t.chrono);
+            
+            if (validChronos.length < 2) return false;
+            
+            const avgChrono = validChronos.reduce((a, b) => a + b, 0) / validChronos.length;
+            const diff = chrono - avgChrono;
+            
+            if (diff > 3) {
+                currentSlowLapPenalty = diff;
+                document.getElementById('slowLapDiff').textContent = diff.toFixed(1) + 's';
+                document.getElementById('slowLapModal').classList.add('active');
+                return true;
+            }
+            
+            return false;
+        }
+
+        function confirmSlowLap(isPermanent) {
+            document.getElementById('slowLapModal').classList.remove('active');
+            
+            if (isPermanent && tours.length > 0) {
+                const lastTour = tours[tours.length - 1];
+                lastTour.slowLapPermanent = true;
+                lastTour.penaltyPerTour = currentSlowLapPenalty;
+                saveTours();
+            }
+            
+            currentSlowLapPenalty = 0;
+            computeAll();
+        }
+
+        function detectPitStop() {
+            if (tours.length < 2) return false;
+            
+            const lastTour = tours[tours.length - 1];
+            const prevTour = tours[tours.length - 2];
+            
+            const hadDamage = prevTour.degat !== 'none' || prevTour.slowLapPermanent;
+            const noDamageNow = lastTour.degat === 'none' && !lastTour.slowLapPermanent;
+            
+            if (hadDamage && noDamageNow) {
+                tours.forEach(t => {
+                    t.slowLapPermanent = false;
+                    t.penaltyPerTour = 0;
+                });
+                saveTours();
+                return true;
+            }
+            
+            return false;
+        }
+
+        function addTour() {
+            params = readParams();
+            
+            const tourNum = parseInt(document.getElementById('tour_numero').value) || 1;
+            const chronoInput = document.getElementById('tour_chrono').value;
+            const chrono = parseChronoToSeconds(chronoInput);
+            const degat = document.getElementById('tour_degat').value;
+            const fuel = parseFloat(document.getElementById('tour_fuel').value) || null;
+
+            const tour = {
+                tour: tourNum,
+                chrono: chrono,
+                degat: degat,
+                fuel: fuel,
+                slowLapPermanent: false,
+                penaltyPerTour: 0,
+                ts: Date.now()
+            };
+
+            tours.push(tour);
+            saveTours();
+            
+            const pitStopDetected = detectPitStop();
+            
+            document.getElementById('tour_numero').value = tourNum + 1;
+            document.getElementById('tour_chrono').value = '';
+            document.getElementById('tour_fuel').value = '';
+            document.getElementById('tour_degat').value = 'none';
+
+            if (chrono && degat === 'none' && !pitStopDetected) {
+                if (checkSlowLap(chrono)) {
+                    return;
+                }
+            }
+
+            computeAll();
+        }
+
+        function undoLastTour() {
+            if (tours.length === 0) {
+                alert('Aucun tour à annuler');
+                return;
+            }
+            tours.pop();
+            saveTours();
+            computeAll();
+        }
+
+        function clearAllTours() {
+            if (confirm('⚠️ Êtes-vous sûr de vouloir effacer tous les tours enregistrés ?')) {
+                tours = [];
+                localStorage.removeItem('dx_tours');
+                document.getElementById('tour_numero').value = 1;
+                computeAll();
+                alert('✅ Tous les tours ont été effacés');
+            }
+        }
+
+        function resetAll() {
+            if (confirm('⚠️ Réinitialiser tous les paramètres et tours ?')) {
+                localStorage.removeItem('dx_params');
+                localStorage.removeItem('dx_tours');
+                location.reload();
+            }
+        }
+
+        function computeAll() {
+            params = readParams();
+            computeKPIs();
+            updateAdvice();
+            renderHistory();
+            updateWidget();
+        }
+
+        function computeKPIs() {
+            if (tours.length === 0) {
+                document.getElementById('kpi_autonomie').textContent = '--';
+                document.getElementById('kpi_tours_restants').textContent = '--';
+                return;
+            }
+
+            const lastTour = tours[tours.length - 1];
+            const fuel = lastTour.fuel || 0;
+            const autonomie = fuel / params.conso_tour;
+            
+            let toursRest;
+            if (params.course_tours) {
+                toursRest = params.course_tours - lastTour.tour;
+            } else if (params.course_minutes && params.tour_moyen) {
+                const tempsTotal = params.course_minutes * 60;
+                const toursTotal = Math.floor(tempsTotal / params.tour_moyen);
+                toursRest = toursTotal - lastTour.tour;
+            } else {
+                toursRest = 0;
+            }
+            
+            document.getElementById('kpi_autonomie').textContent = autonomie.toFixed(1);
+            document.getElementById('kpi_tours_restants').textContent = toursRest;
+        }
+
+        function getDegatsActifs() {
+            const degats = { avant: false, arriere: false, suspension: false };
+            tours.forEach(t => {
+                if (t.degat === 'avant') degats.avant = true;
+                if (t.degat === 'arriere') degats.arriere = true;
+                if (t.degat === 'suspension') degats.suspension = true;
+            });
+            return degats;
+        }
+
+        function computePenaltyPerTour() {
+            const degats = getDegatsActifs();
+            let penalty = 0;
+            if (degats.avant) penalty += params.pen_avant;
+            if (degats.arriere) penalty += params.pen_arriere;
+            if (degats.suspension) penalty += params.pen_suspension;
+            
+            tours.forEach(t => {
+                if (t.slowLapPermanent && t.penaltyPerTour) {
+                    penalty = t.penaltyPerTour;
+                }
+            });
+            
+            return penalty;
+        }
+
+        function computeRepairTime() {
+            const degats = getDegatsActifs();
+            let repairTime = 0;
+            if (degats.avant) repairTime += params.repair_aileron_avant;
+            if (degats.arriere) repairTime += params.repair_aileron_arriere;
+            if (degats.suspension) repairTime += params.repair_suspension;
+            return repairTime;
+        }
+
+        function updateAdvice() {
+            const adviceBox = document.getElementById('advice_box');
+            
+            if (tours.length === 0) {
+                adviceBox.textContent = 'Enregistrez votre premier tour pour obtenir des conseils stratégiques.';
+                adviceBox.className = 'advice-box';
+                return;
+            }
+
+            const lastTour = tours[tours.length - 1];
+            const fuel = lastTour.fuel || 0;
+            const autonomie = fuel / params.conso_tour;
+            
+            let toursRest;
+            if (params.course_tours) {
+                toursRest = params.course_tours - lastTour.tour;
+            } else if (params.course_minutes && params.tour_moyen) {
+                const tempsTotal = params.course_minutes * 60;
+                const toursTotal = Math.floor(tempsTotal / params.tour_moyen);
+                toursRest = toursTotal - lastTour.tour;
+            } else {
+                toursRest = 10;
+            }
+
+            const toursToCalculate = toursRest + params.marge_tours;
+            const fuelNeeded = toursToCalculate * params.conso_tour;
+            const fuelToAdd = Math.max(0, Math.min(params.reservoir_max - fuel, fuelNeeded - fuel));
+            
+            const penaltyPerTour = computePenaltyPerTour();
+            const repairTime = computeRepairTime();
+            const standWorkTime = Math.max(params.changement_pneu, repairTime);
+            const refuelTime = params.temps_refuel * fuelToAdd;
+            const pitTotalTime = params.pit_entryexit + params.pit_base + standWorkTime + refuelTime;
+            
+            const lossIfStay = penaltyPerTour * toursRest;
+            const gainIfPit = lossIfStay - pitTotalTime;
+
+            document.getElementById('pit_time').textContent = pitTotalTime.toFixed(1) + ' s';
+            document.getElementById('fuel_add').textContent = fuelToAdd.toFixed(1) + ' L';
+
+            let advice = '';
+            let adviceClass = 'advice-box';
+
+            const autonomieAvecMarge = autonomie - 2;
+
+            if (autonomieAvecMarge < 1) {
+                advice = `⛽ RENTRER IMMÉDIATEMENT - Risque de panne sèche ! Remettre ${fuelToAdd.toFixed(1)} L (${toursRest} tours + ${params.marge_tours} marge)`;
+                adviceClass = 'advice-box red';
+            } else if (autonomieAvecMarge < params.marge_tours + 1) {
+                advice = `⚠️ Préparez-vous à rentrer - Autonomie critique (${autonomie.toFixed(1)} tours, -2 tours sécurité = ${autonomieAvecMarge.toFixed(1)} tours). `;
+                adviceClass = 'advice-box orange';
+                
+                if (penaltyPerTour > 0 && gainIfPit > 0) {
+                    advice += `Réparation rentable : gain de ${gainIfPit.toFixed(1)}s. Remettre ${fuelToAdd.toFixed(1)} L`;
+                } else {
+                    advice += `Remettre ${fuelToAdd.toFixed(1)} L`;
+                }
+            } else {
+                if (penaltyPerTour > 0) {
+                    if (gainIfPit > 0) {
+                        advice = `🟩 Réparer est rentable ! Gain estimé : ${gainIfPit.toFixed(1)}s (pit ${pitTotalTime.toFixed(1)}s vs perte ${lossIfStay.toFixed(1)}s sur ${toursRest} tours). Remettre ${fuelToAdd.toFixed(1)} L`;
+                        adviceClass = 'advice-box green';
+                    } else {
+                        advice = `🟥 Ne pas réparer pour l'instant - Perte estimée : ${Math.abs(gainIfPit).toFixed(1)}s (pit ${pitTotalTime.toFixed(1)}s vs perte ${lossIfStay.toFixed(1)}s sur ${toursRest} tours)`;
+                        adviceClass = 'advice-box red';
+                    }
+                } else {
+                    advice = `✅ Continuer - Autonomie suffisante (${autonomie.toFixed(1)} tours), pas de dégâts`;
+                    adviceClass = 'advice-box green';
+                }
+            }
+
+            adviceBox.textContent = advice;
+            adviceBox.className = adviceClass;
+        }
+
+        function renderHistory() {
+            const tbody = document.getElementById('history_body');
+            tbody.innerHTML = '';
+
+            if (tours.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--muted);">Aucun tour enregistré</td></tr>';
+                return;
+            }
+
+            const degatLabels = {
+                none: 'Aucun',
+                avant: 'Aileron avant',
+                arriere: 'Aileron arrière',
+                suspension: 'Suspension'
+            };
+
+            tours.forEach(t => {
+                const row = document.createElement('tr');
+                
+                let conseil = '--';
+                if (t.fuel !== null) {
+                    const autonomie = t.fuel / params.conso_tour;
+                    const autonomieAvecMarge = autonomie - 2;
+                    
+                    if (autonomieAvecMarge < 1) {
+                        conseil = '⛽ Rentrer';
+                    } else if (autonomieAvecMarge < params.marge_tours + 1) {
+                        conseil = '⚠️ Préparer pit';
+                    } else {
+                        conseil = '✅ OK';
+                    }
+                }
+                
+                if (t.slowLapPermanent) {
+                    conseil += ' 🐌';
+                }
+
+                row.innerHTML = `
+                    <td style="width: 15%;">${t.tour}</td>
+                    <td style="width: 20%;">${formatSecondsToDisplay(t.chrono)}</td>
+                    <td style="width: 20%;">${degatLabels[t.degat] || t.degat}</td>
+                    <td style="width: 15%;">${t.fuel !== null ? t.fuel.toFixed(1) + ' L' : '--'}</td>
+                    <td style="width: 30%; font-size: 11px;">${conseil}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateWidget() {
+            if (tours.length === 0) {
+                document.getElementById('widget_tours').textContent = '--';
+                document.getElementById('widget_progress').style.width = '0%';
+                document.getElementById('widget_fuel').textContent = '-- L';
+                document.getElementById('widget_degats').textContent = 'Aucun';
+                document.getElementById('widget_pit_time').textContent = '-- s';
+                return;
+            }
+
+            const lastTour = tours[tours.length - 1];
+            const fuel = lastTour.fuel || 0;
+            
+            let toursRest;
+            if (params.course_tours) {
+                toursRest = params.course_tours - lastTour.tour;
+            } else if (params.course_minutes && params.tour_moyen) {
+                const tempsTotal = params.course_minutes * 60;
+                const toursTotal = Math.floor(tempsTotal / params.tour_moyen);
+                toursRest = toursTotal - lastTour.tour;
+            } else {
+                toursRest = 0;
+            }
+
+            const toursToCalculate = toursRest + params.marge_tours;
+            const fuelNeeded = toursToCalculate * params.conso_tour;
+            const fuelToAdd = Math.max(0, Math.min(params.reservoir_max - fuel, fuelNeeded - fuel));
+
+            const repairTime = computeRepairTime();
+            const standWorkTime = Math.max(params.changement_pneu, repairTime);
+            const refuelTime = params.temps_refuel * fuelToAdd;
+            const pitTotalTime = params.pit_entryexit + params.pit_base + standWorkTime + refuelTime;
+
+            const degats = getDegatsActifs();
+            const degatsText = [];
+            if (degats.avant) degatsText.push('Avant');
+            if (degats.arriere) degatsText.push('Arrière');
+            if (degats.suspension) degatsText.push('Suspension');
+            
+            const hasSlowLap = tours.some(t => t.slowLapPermanent);
+            if (hasSlowLap) degatsText.push('Perf. réduite');
+
+            const progressPercent = params.course_tours ? ((lastTour.tour / params.course_tours) * 100) : 50;
+
+            document.getElementById('widget_tours').textContent = toursRest;
+            document.getElementById('widget_progress').style.width = progressPercent + '%';
+            document.getElementById('widget_fuel').textContent = fuelToAdd.toFixed(1) + ' L';
+            document.getElementById('widget_degats').textContent = degatsText.length > 0 ? degatsText.join(', ') : 'Aucun';
+            document.getElementById('widget_pit_time').textContent = pitTotalTime.toFixed(1) + ' s';
+        }
+
+        function openModal() {
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function saveModalParams() {
+            saveParams();
+            closeModal();
+        }
+
+        window.addEventListener('load', init);
+    </script>
 </body>
 </html>
